@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Porch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;padding:0}
+img{max-width:100%}
+[hidden]:not([hidden=until-found i]){display:none!important}
+</style>
+<style>
+/* Layout: a single phone-width column (max 440px) centered on any screen; bottom tab bar; screens swap in place. */
+:root{
+  --ground:#F6F7F3; --surface:#FFFFFF; --line:#DCE2DE; --ink:#16262E; --ink-muted:#51626A;
+  --dusk:#1F4555; --on-dusk:#F6F7F3; --haint:#A8D8D4; --porch-light:#F2B530; --sage:#6F937B; --danger:#B3412E;
+  --font-display:"Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans:"Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r-sm:6px; --r-md:12px; --r-full:999px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#12191D; --surface:#1A2328; --line:#2C3940; --ink:#EEF2EF; --ink-muted:#A3B2B5;
+  --dusk:#3A7489; --on-dusk:#F6F7F3; --haint:#7FBDB8; --porch-light:#F5C04A; --sage:#8FB39A; --danger:#E07A64; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12191D; --surface:#1A2328; --line:#2C3940; --ink:#EEF2EF; --ink-muted:#A3B2B5;
+  --dusk:#3A7489; --on-dusk:#F6F7F3; --haint:#7FBDB8; --porch-light:#F5C04A; --sage:#8FB39A; --danger:#E07A64; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--ground);color:var(--ink);font-family:var(--font-sans);font-size:16px;line-height:24px}
+.app{max-width:440px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;background:var(--ground);position:relative}
+@media (min-width:480px){.app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--dusk);color:var(--on-dusk);padding:12px 16px;display:flex;align-items:center;gap:10px}
+header.bar svg{width:26px;height:26px;color:var(--porch-light)}
+header.bar .word{font-family:var(--font-display);font-weight:700;font-size:22px;letter-spacing:-.02em}
+header.bar .where{margin-left:auto;font-size:12px;line-height:16px;font-weight:500;opacity:.85}
+main{flex:1;padding:24px 16px 96px;display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--font-display);font-weight:700;font-size:32px;line-height:36px;letter-spacing:-.02em;margin:0;text-wrap:balance}
+h2{font-size:18px;line-height:24px;font-weight:600;margin:0}
+p{margin:0}
+.muted{color:var(--ink-muted)}
+.cap{font-size:12px;line-height:16px;font-weight:500;letter-spacing:.02em;color:var(--ink-muted)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:var(--r-full);padding:6px 14px;font:600 14px/20px var(--font-sans);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--haint);border-color:var(--haint);color:#16262E}
+.chip.static{cursor:default;padding:2px 10px;font-size:12px;line-height:18px}
+.chip.static.shared{background:var(--haint);border-color:var(--haint);color:#16262E}
+.btn{border:0;border-radius:var(--r-full);padding:10px 20px;font:600 14px/20px var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.primary{background:var(--porch-light);color:#16262E}
+.btn.quiet{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.block{width:100%;padding:14px 20px;font-size:16px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--dusk);outline-offset:2px}
+.card{background:var(--surface);border-radius:var(--r-md);padding:16px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--line)}
+.person{display:flex;gap:12px;align-items:flex-start}
+.avatar{flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font:700 20px/1 var(--font-display);color:#16262E;position:relative}
+.avatar .on{position:absolute;right:0;bottom:0;width:14px;height:14px;border-radius:50%;background:var(--sage);border:3px solid var(--surface)}
+.person .info{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+.name{font-weight:600}
+.both{font-weight:600;color:var(--ink)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row .push{margin-left:auto}
+.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));z-index:6}
+.tabs button{background:none;border:0;color:var(--ink-muted);font:600 12px/16px var(--font-sans);display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;cursor:pointer;position:relative}
+.tabs button svg{width:22px;height:22px}
+.tabs button[aria-current="page"]{color:var(--dusk)}
+:root[data-theme="dark"] .tabs button[aria-current="page"]{color:var(--haint)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tabs button[aria-current="page"]{color:var(--haint)}}
+.badge{position:absolute;top:2px;left:calc(50% + 6px);background:var(--porch-light);color:#16262E;border-radius:var(--r-full);font-size:11px;line-height:16px;min-width:16px;padding:0 4px}
+.seg{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.date{flex:none;width:56px;border-radius:var(--r-md);background:var(--haint);color:#16262E;display:flex;flex-direction:column;align-items:center;padding:6px 0}
+.date b{font:700 22px/26px var(--font-display)}
+.date span{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.going{display:flex}
+.going .avatar{width:28px;height:28px;font-size:12px;border:2px solid var(--surface);margin-left:-8px}
+.going .avatar:first-child{margin-left:0}
+.thread{display:flex;flex-direction:column;gap:8px}
+.bubble{max-width:80%;padding:10px 14px;border-radius:var(--r-md);font-size:15px;line-height:22px}
+.bubble.them{background:var(--surface);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+.bubble.me{background:var(--haint);color:#16262E;align-self:flex-end;border-bottom-right-radius:4px}
+.composer{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;background:var(--surface);border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;z-index:7}
+.composer input{flex:1;min-width:0;border:1px solid var(--line);border-radius:var(--r-full);padding:10px 16px;font:400 15px/20px var(--font-sans);background:var(--ground);color:var(--ink)}
+.back{background:none;border:0;color:var(--on-dusk);font:600 14px/20px var(--font-sans);cursor:pointer;padding:4px 0}
+.list-item{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px;cursor:pointer;text-align:left;color:var(--ink);font:inherit;width:100%}
+.list-item .info{min-width:0;flex:1}
+.list-item .last{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{background:var(--haint);color:#16262E;border-radius:var(--r-md);padding:24px 16px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center}
+.note{font-size:12px;line-height:16px;color:var(--ink-muted);text-align:center}
+.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:var(--r-full);font-weight:600;font-size:14px;z-index:9}
+.typing{font-size:13px;color:var(--ink-muted);font-style:italic}
+@media (prefers-reduced-motion:no-preference){.card,.list-item,.bubble{animation:rise .25s ease-out both}@keyframes rise{from{transform:translateY(4px)}to{transform:none}}}
+</style>
+</head>
+<body>
+
+<div class="app" id="app"></div>
+
+<script>
+const MARK='<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 30 32 10l24 20"/><path d="M14 57h36"/><circle cx="23" cy="43" r="6" fill="currentColor" stroke="none"/><circle cx="41" cy="43" r="6" fill="currentColor" stroke="none"/></svg>';
+const ICONS={
+  nearby:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.5c3 0 6 2 6 5.5"/></svg>',
+  gather:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+  you:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12 12 5l8 7M6 10v10h12V10"/></svg>'
+};
+const INTERESTS=["Board games","Hiking","Coffee","Pickleball","Book club","Cooking","Live music","Thrifting","Yoga","Trivia nights","Gardening","Photography","Volunteering","Dogs"];
+const TINTS=["var(--haint)","var(--porch-light)","#C9D6CF","#E8D3A8","#B9CFDA"];
+const PEOPLE=[
+  {id:"maya",name:"Maya",d:0.4,on:true,bio:"New to Knoxville from Ohio. Looking for a Sunday walking crew and someone to split a coffee with.",i:["Hiking","Coffee","Book club","Dogs"]},
+  {id:"jordan",name:"Jordan",d:0.8,on:true,bio:"I host a board game night most Thursdays. Always room for one more at the table.",i:["Board games","Trivia nights","Live music"]},
+  {id:"priya",name:"Priya",d:1.2,on:false,bio:"Nurse on night shifts. Free weekday mornings for pickleball or a farmers market run.",i:["Pickleball","Cooking","Gardening","Coffee"]},
+  {id:"dee",name:"Dee",d:1.6,on:true,bio:"Retired teacher. Garden club, thrift stores, and I make a mean peach cobbler.",i:["Gardening","Thrifting","Cooking","Volunteering"]},
+  {id:"sam",name:"Sam",d:2.3,on:false,bio:"Film camera nerd. Happy to show you the best sunset spots on the river.",i:["Photography","Hiking","Live music"]},
+  {id:"lena",name:"Lena",d:3.1,on:true,bio:"Remote worker who misses office small talk. Yoga, trivia, and a good book.",i:["Yoga","Trivia nights","Book club","Coffee"]}
+];
+const REPLIES={
+  maya:"Yes! I'm free Sunday morning. Know a good trail near here?",
+  jordan:"Come Thursday at 7. I'll teach you Wingspan, it's easy.",
+  priya:"I'd love that. Wednesday at 9 work for you?",
+  dee:"Well hello! Saturday market is my favorite. Meet by the honey stand?",
+  sam:"Sure thing. Golden hour is around 6:40 this week.",
+  lena:"Ha, finally a trivia teammate. Tuesday at the brewery?"
+};
+const state={
+  tab:"nearby", onboarded:false, mine:new Set(["Board games","Coffee","Hiking"]), filter:null,
+  chats:{}, openChat:null, typing:null, unread:0,
+  gatherings:[
+    {id:"g1",day:"THU",n:15,title:"Board game night",where:"Jordan's place · 0.8 mi",time:"7:00 PM",tag:"Board games",host:"jordan",going:["jordan","lena"],rsvp:false},
+    {id:"g2",day:"SAT",n:17,title:"Market morning & coffee",where:"Market Square · 1.4 mi",time:"9:00 AM",tag:"Coffee",host:"dee",going:["dee","priya","maya"],rsvp:false},
+    {id:"g3",day:"SUN",n:18,title:"Easy river walk",where:"Greenway trailhead · 0.6 mi",time:"8:30 AM",tag:"Hiking",host:"maya",going:["maya","sam"],rsvp:false},
+    {id:"g4",day:"TUE",n:20,title:"Trivia team needs one",where:"Brewery on Fifth · 2.9 mi",time:"7:30 PM",tag:"Trivia nights",host:"lena",going:["lena"],rsvp:false}
+  ]
+};
+try{const s=JSON.parse(localStorage.getItem("porch-v1")||"null");if(s){state.onboarded=!!s.onboarded;if(Array.isArray(s.mine))state.mine=new Set(s.mine);}}catch(e){}
+function save(){try{localStorage.setItem("porch-v1",JSON.stringify({onboarded:state.onboarded,mine:[...state.mine]}))}catch(e){}}
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const person=id=>PEOPLE.find(p=>p.id===id);
+const tint=id=>TINTS[PEOPLE.findIndex(p=>p.id===id)%TINTS.length];
+const shared=p=>p.i.filter(x=>state.mine.has(x));
+function avatar(p,on){return `<span class="avatar" style="background:${tint(p.id)}">${p.name[0]}${on&&p.on?'<span class="on" title="Nearby now"></span>':''}</span>`}
+function toast(msg){const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),1800)}
+
+function header(back){
+  return back?`<header class="bar"><button class="back" data-act="back">‹ Back</button><span class="word" style="font-size:18px">${esc(back)}</span></header>`
+  :`<header class="bar">${MARK}<span class="word">Porch</span><span class="where">Knoxville, TN</span></header>`;
+}
+function tabs(){
+  const t=[["nearby","Nearby"],["gather","Gatherings"],["chat","Messages"],["you","You"]];
+  return `<nav class="tabs" aria-label="Main">${t.map(([k,l])=>`<button data-tab="${k}" ${state.tab===k?'aria-current="page"':''}>${ICONS[k]}${l}${k==="chat"&&state.unread?`<span class="badge">${state.unread}</span>`:''}</button>`).join("")}</nav>`;
+}
+function interestPicker(){
+  return `<div class="chips" role="group" aria-label="Your interests">${INTERESTS.map(x=>`<button class="chip" data-int="${esc(x)}" aria-pressed="${state.mine.has(x)}">${esc(x)}</button>`).join("")}</div>`;
+}
+
+function viewOnboard(){
+  return `${header()}<main>
+    <div class="stack"><h1>Pull up a chair.</h1><p class="muted">Pick a few things you like. We'll show you people close by who like them too.</p></div>
+    ${interestPicker()}
+    <p class="cap">${state.mine.size} picked · choose at least 3</p>
+    <button class="btn primary block" data-act="start" ${state.mine.size<3?"disabled":""}>Show me who's nearby</button>
+    <p class="note">This is a preview. Everyone you'll see is a sample person.</p>
+  </main>`;
+}
+function viewNearby(){
+  let list=PEOPLE.map(p=>({p,s:shared(p)})).filter(x=>x.s.length);
+  if(state.filter)list=list.filter(x=>x.p.i.includes(state.filter));
+  list.sort((a,b)=>b.s.length-a.s.length||a.p.d-b.p.d);
+  const mine=[...state.mine];
+  return `${header()}<main>
+    <div class="stack"><h1>Your people nearby</h1><p class="muted">Sorted by what you have in common, then distance.</p></div>
+    <div class="chips" role="group" aria-label="Filter">
+      <button class="chip" data-filter="" aria-pressed="${!state.filter}">All</button>
+      ${mine.map(x=>`<button class="chip" data-filter="${esc(x)}" aria-pressed="${state.filter===x}">${esc(x)}</button>`).join("")}
+    </div>
+    <div class="stack">${list.length?list.map(({p,s})=>`
+      <article class="card">
+        <div class="person">${avatar(p,true)}
+          <div class="info"><div class="row"><span class="name">${esc(p.name)}</span><span class="cap push">${p.d} mi away</span></div>
+          <p class="both">You both like ${esc(s.join(" and ").replace(/ and (?=.* and )/g,", "))}</p></div></div>
+        <p class="muted">${esc(p.bio)}</p>
+        <div class="chips">${p.i.map(x=>`<span class="chip static ${state.mine.has(x)?"shared":""}">${esc(x)}</span>`).join("")}</div>
+        <div class="row"><span class="cap">${p.on?"Nearby now":"Usually around evenings"}</span><button class="btn primary push" data-hi="${p.id}">${state.chats[p.id]?"Open chat":"Say hi"}</button></div>
+      </article>`).join(""):`<div class="empty"><h2>No one here yet</h2><p>Try another interest, or add more on the You tab.</p></div>`}</div>
+  </main>`;
+}
+function viewGather(){
+  return `${header()}<main>
+    <div class="stack"><h1>Gatherings this week</h1><p class="muted">Small meetups hosted by neighbors. Join one and you're in.</p></div>
+    <div class="stack">${state.gatherings.map(g=>{const h=person(g.host);const going=g.going.map(person);return `
+      <article class="card">
+        <div class="row" style="align-items:flex-start;flex-wrap:nowrap">
+          <div class="date"><span>${g.day}</span><b>${g.n}</b></div>
+          <div style="min-width:0;flex:1" class="stack" ><div><h2>${esc(g.title)}</h2><p class="cap">${esc(g.time)} · ${esc(g.where)}</p></div>
+          <p class="muted" style="font-size:14px;line-height:20px">Hosted by ${esc(h.name)} · <span class="chip static ${state.mine.has(g.tag)?"shared":""}">${esc(g.tag)}</span></p></div>
+        </div>
+        <div class="row"><div class="going">${going.map(p=>avatar(p)).join("")}${g.rsvp?`<span class="avatar" style="background:var(--porch-light)">Y</span>`:""}</div>
+          <span class="cap">${g.going.length+(g.rsvp?1:0)} going</span>
+          <button class="btn ${g.rsvp?"quiet":"primary"} push" data-rsvp="${g.id}" aria-pressed="${g.rsvp}">${g.rsvp?"You're going ✓":"Join"}</button></div>
+      </article>`}).join("")}</div>
+  </main>`;
+}
+function viewChats(){
+  const ids=Object.keys(state.chats);
+  return `${header()}<main>
+    <div class="stack"><h1>Messages</h1></div>
+    ${ids.length?`<div class="stack">${ids.map(id=>{const p=person(id);const m=state.chats[id];const last=m[m.length-1];return `
+      <button class="list-item" data-open="${id}">${avatar(p,true)}<div class="info"><div class="name">${esc(p.name)}</div><div class="cap last">${last.me?"You: ":""}${esc(last.t)}</div></div></button>`}).join("")}</div>`
+    :`<div class="empty"><h2>No chats yet</h2><p>Say hi to someone on the Nearby tab. Lead with the thing you both like.</p><button class="btn primary" data-tab="nearby">Find people</button></div>`}
+  </main>`;
+}
+function viewThread(){
+  const p=person(state.openChat);const m=state.chats[p.id]||[];
+  return `${header(p.name)}<main style="padding-bottom:110px">
+    <div class="card" style="flex-direction:row;align-items:center">${avatar(p,true)}<div><p class="name">${esc(p.name)} · ${p.d} mi</p><p class="cap">You both like ${esc(shared(p).join(", "))}</p></div></div>
+    <div class="thread" aria-live="polite">${m.map(x=>`<div class="bubble ${x.me?"me":"them"}">${esc(x.t)}</div>`).join("")}${state.typing===p.id?`<div class="typing">${esc(p.name)} is typing…</div>`:""}</div>
+  </main>
+  <form class="composer" id="composer"><label for="msg" style="position:absolute;left:-9999px">Message</label><input id="msg" autocomplete="off" placeholder="Write a message"><button class="btn primary" type="submit">Send</button></form>`;
+}
+function viewYou(){
+  const n=state.gatherings.filter(g=>g.rsvp).length;
+  return `${header()}<main>
+    <div class="person">${`<span class="avatar" style="background:var(--porch-light);width:64px;height:64px;font-size:26px">Y</span>`}<div class="info"><h1 style="font-size:26px;line-height:30px">You</h1><p class="cap">Knoxville, TN · ${n} gathering${n===1?"":"s"} joined · ${Object.keys(state.chats).length} chat${Object.keys(state.chats).length===1?"":"s"}</p></div></div>
+    <div class="stack"><h2>Your interests</h2><p class="muted">Tap to add or remove. Nearby updates right away.</p>${interestPicker()}</div>
+    <div class="card"><h2>Staying safe</h2><p class="muted">Meet in public places first. You can block or report anyone from their chat.</p></div>
+    <button class="btn quiet" data-act="reset">Start over</button>
+    <p class="note">Preview with sample people. Nothing you do here is sent anywhere.</p>
+  </main>`;
+}
+function render(){
+  const app=$("#app");
+  if(!state.onboarded){app.innerHTML=viewOnboard();return}
+  if(state.openChat){app.innerHTML=viewThread();$("#msg").focus();window.scrollTo(0,document.body.scrollHeight);return}
+  const v={nearby:viewNearby,gather:viewGather,chat:viewChats,you:viewYou}[state.tab]();
+  app.innerHTML=v+tabs();
+}
+function openChat(id){
+  if(!state.chats[id]){const p=person(id);const s=shared(p)[0]||p.i[0];
+    state.chats[id]=[{me:true,t:`Hi ${p.name}! I saw you're into ${s.toLowerCase()} too. Want to meet up sometime?`}];
+    queueReply(id);}
+  state.openChat=id;render();
+}
+function queueReply(id){
+  state.typing=id;
+  setTimeout(()=>{state.typing=null;state.chats[id].push({me:false,t:REPLIES[id]});
+    if(state.openChat!==id)state.unread++;render();},1600);
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.int!==undefined){const x=b.dataset.int;state.mine.has(x)?state.mine.delete(x):state.mine.add(x);if(state.filter&&!state.mine.has(state.filter))state.filter=null;save();render();return}
+  if(b.dataset.tab){state.tab=b.dataset.tab;if(b.dataset.tab==="chat")state.unread=0;state.openChat=null;render();window.scrollTo(0,0);return}
+  if(b.dataset.filter!==undefined){state.filter=b.dataset.filter||null;render();return}
+  if(b.dataset.hi){openChat(b.dataset.hi);return}
+  if(b.dataset.open){openChat(b.dataset.open);return}
+  if(b.dataset.rsvp){const g=state.gatherings.find(x=>x.id===b.dataset.rsvp);g.rsvp=!g.rsvp;render();toast(g.rsvp?`You're going to ${g.title}`:"RSVP removed");return}
+  const a=b.dataset.act;
+  if(a==="start"){state.onboarded=true;state.tab="nearby";save();render();}
+  if(a==="back"){state.openChat=null;state.tab="chat";render();}
+  if(a==="reset"){state.onboarded=false;state.chats={};state.unread=0;state.filter=null;state.gatherings.forEach(g=>g.rsvp=false);save();render();}
+});
+document.addEventListener("submit",e=>{
+  if(e.target.id!=="composer")return;e.preventDefault();
+  const v=$("#msg").value.trim();if(!v)return;
+  state.chats[state.openChat].push({me:true,t:v});render();
+  const id=state.openChat;setTimeout(()=>{state.chats[id].push({me:false,t:"Sounds good! See you then."});if(state.openChat!==id)state.unread++;render();},1400);
+});
+render();
+</script>
+
+</body>
+</html>
