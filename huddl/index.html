@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B1F3A">
+<title>The Huddl</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one phone-width column (max 460px) centered on any screen. Header holds the
+   Player/Coach switch; player view has a bottom tab bar; coach view drills into a player. */
+:root{
+  --ground:#EEF1F5; --surface:#FFFFFF; --line:#DCE1E8; --ink:#0E1726; --ink-muted:#566173;
+  --navy:#0B1F3A; --on-navy:#F4F6FA; --accent:#FF6A13; --accent-ink:#1A0E05; --accent-soft:#FFE6D6;
+  --bar:#FF6A13; --track:#E3E7ED; --jersey:#0B1F3A;
+  --good:#1E7F45; --good-bg:#DDF3E5; --warn:#9A5B00; --warn-bg:#FFF0D1; --bad:#B42318; --bad-bg:#FDE3E0;
+  --display:"Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
+  --sans:"Barlow", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:14px; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#0A111C; --surface:#131D2B; --line:#26334A; --ink:#EEF2F8; --ink-muted:#9AA6B8;
+  --navy:#07162B; --on-navy:#F4F6FA; --accent:#FF7D33; --accent-soft:#3A2214;
+  --bar:#FF7D33; --track:#22304A; --jersey:#2A4670;
+  --good:#5BD18A; --good-bg:#12301F; --warn:#F2B53C; --warn-bg:#332611; --bad:#FF7A6B; --bad-bg:#3A1714; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#0A111C; --surface:#131D2B; --line:#26334A; --ink:#EEF2F8; --ink-muted:#9AA6B8;
+  --navy:#07162B; --on-navy:#F4F6FA; --accent:#FF7D33; --accent-soft:#3A2214;
+  --bar:#FF7D33; --track:#22304A; --jersey:#2A4670;
+  --good:#5BD18A; --good-bg:#12301F; --warn:#F2B53C; --warn-bg:#332611; --bad:#FF7A6B; --bad-bg:#3A1714; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--ground);color:var(--ink);font:16px/24px var(--sans);-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.app{max-width:460px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--ground)}
+@media (min-width:500px){.app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+
+header.bar{position:sticky;top:0;z-index:10;background:var(--navy);color:var(--on-navy);
+  padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;display:flex;align-items:center;gap:12px}
+.logo{display:flex;align-items:center;gap:8px;font:800 24px/1 var(--display);letter-spacing:.01em;text-transform:uppercase}
+.logo svg{width:28px;height:28px;flex:none}
+.logo b{color:var(--accent)}
+.switch{margin-left:auto;display:flex;background:rgba(255,255,255,.1);border-radius:999px;padding:3px}
+.switch button{border:0;background:transparent;color:var(--on-navy);opacity:.75;font:700 13px/1 var(--sans);
+  letter-spacing:.04em;text-transform:uppercase;padding:9px 14px;border-radius:999px;cursor:pointer}
+.switch button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);opacity:1}
+
+main{flex:1;padding:20px 16px 112px;display:flex;flex-direction:column;gap:20px}
+h1{font:800 34px/36px var(--display);text-transform:uppercase;letter-spacing:.01em;margin:0}
+h2{font:700 20px/24px var(--display);text-transform:uppercase;letter-spacing:.03em;margin:0}
+p{margin:0}
+.muted{color:var(--ink-muted)}
+.eyebrow{font:700 12px/16px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+
+/* Check-in */
+.hero{background:var(--navy);color:var(--on-navy);border-radius:var(--r);padding:18px;display:flex;align-items:center;gap:16px}
+.hero .eyebrow{color:rgba(244,246,250,.7)}
+.ring{flex:none;width:76px;height:76px;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:800 28px/1 var(--display)}
+.ring .num small{font-size:15px;opacity:.7}
+.items{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;align-items:center;gap:14px;width:100%;min-height:72px;padding:14px 16px;text-align:left;cursor:pointer;
+  background:var(--surface);border:2px solid var(--line);border-radius:var(--r);transition:transform .08s,background .15s,border-color .15s}
+.item:active{transform:scale(.98)}
+.item .ic{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--ground);font-size:22px}
+.item .t{flex:1;min-width:0}
+.item .t strong{display:block;font:700 18px/22px var(--sans)}
+.item .t span{font-size:14px;line-height:18px;color:var(--ink-muted)}
+.item .ck{flex:none;width:32px;height:32px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center}
+.item .ck svg{width:18px;height:18px;opacity:0}
+.item[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.item[aria-pressed="true"] .ck{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.item[aria-pressed="true"] .ck svg{opacity:1}
+.btn{border:0;border-radius:999px;padding:14px 22px;font:700 16px/20px var(--sans);letter-spacing:.02em;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.block{width:100%}
+.btn.small{padding:8px 14px;font-size:14px}
+.done-banner{display:flex;gap:12px;align-items:center;background:var(--good-bg);color:var(--ink);border-radius:var(--r);padding:14px 16px}
+.done-banner .big{font-size:28px}
+
+/* Stats + chart */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.stat .v{font:600 30px/34px var(--sans);font-variant-numeric:tabular-nums}
+.stat .l{font-size:13px;line-height:16px;color:var(--ink-muted)}
+.streak{display:flex;align-items:center;gap:16px}
+.streak .v{font:600 56px/56px var(--sans)}
+.streak .fire{font-size:44px}
+.chart{position:relative;margin-top:12px}
+.plot{position:relative;height:150px;display:grid;grid-template-columns:repeat(7,1fr);align-items:end;border-bottom:1px solid var(--line)}
+.grid{position:absolute;left:0;right:0;border-top:1px solid var(--line);pointer-events:none}
+.grid span{position:absolute;right:0;top:-18px;font-size:11px;color:var(--ink-muted)}
+.col{position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;cursor:pointer;border:0;background:transparent;padding:0}
+.col .b{width:24px;max-width:70%;background:var(--bar);border-radius:4px 4px 0 0;min-height:0;transition:height .3s}
+.col .zero{width:24px;max-width:70%;height:2px;background:var(--track)}
+.col .lab{font:700 13px/16px var(--sans);margin-bottom:4px}
+.col.dim .b{opacity:.45}
+.days{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:12px;line-height:16px;color:var(--ink-muted);margin-top:6px}
+.days .today{color:var(--ink);font-weight:700}
+.tip{position:absolute;z-index:3;transform:translate(-50%,-100%);background:var(--ink);color:var(--surface);font-size:13px;line-height:18px;
+  padding:6px 10px;border-radius:8px;white-space:nowrap;pointer-events:none}
+.quote{border-left:4px solid var(--accent);padding:4px 0 4px 14px;font:600 18px/26px var(--sans)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Coach */
+.badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font:700 12px/18px var(--sans);white-space:nowrap}
+.badge.good{background:var(--good-bg);color:var(--good)}
+.badge.warn{background:var(--warn-bg);color:var(--warn)}
+.badge.bad{background:var(--bad-bg);color:var(--bad)}
+.stat.good .v{color:var(--good)} .stat.warn .v{color:var(--warn)} .stat.bad .v{color:var(--bad)}
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{flex:1;border:0;background:transparent;padding:8px 6px;border-radius:999px;font:600 14px/18px var(--sans);cursor:pointer;color:var(--ink-muted)}
+.seg button[aria-pressed="true"]{background:var(--navy);color:var(--on-navy)}
+.roster{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;cursor:pointer;width:100%;min-height:68px}
+.row:first-child{border-top:0}
+.row:active{background:var(--ground)}
+.jersey{flex:none;width:42px;height:42px;border-radius:10px;background:var(--jersey);color:var(--on-navy);display:grid;place-items:center;font:800 20px/1 var(--display)}
+.row .who{flex:1;min-width:0}
+.row .who strong{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .who span{font-size:13px;line-height:16px;color:var(--ink-muted)}
+.row .pct{flex:none;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.row .pct b{font:600 18px/20px var(--sans);font-variant-numeric:tabular-nums}
+.you{font:700 10px/14px var(--sans);letter-spacing:.08em;background:var(--accent);color:var(--accent-ink);border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:2px}
+.back{align-self:flex-start;border:0;background:transparent;color:var(--ink-muted);font:600 15px/20px var(--sans);padding:6px 0;cursor:pointer;display:flex;align-items:center;gap:4px}
+.ph{display:flex;align-items:center;gap:14px}
+.ph .jersey{width:56px;height:56px;font-size:26px;border-radius:14px}
+.meter{display:flex;flex-direction:column;gap:12px}
+.meter .r{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;font-size:15px}
+.meter .track{grid-column:1/-1;height:8px;border-radius:999px;background:var(--track);overflow:hidden}
+.meter .fill{height:100%;border-radius:999px;background:var(--bar)}
+.meter .r b{font-variant-numeric:tabular-nums}
+
+nav.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;z-index:10;
+  background:var(--surface);border-top:1px solid var(--line);display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+nav.tabs[hidden]{display:none}
+nav.tabs button{flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;
+  font:700 12px/16px var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);cursor:pointer;border-radius:10px}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-current="page"]{color:var(--accent)}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:999px;
+  font-weight:600;font-size:14px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+.foot{text-align:center;font-size:12px;color:var(--ink-muted)}
+.linkish{border:0;background:none;color:var(--ink-muted);text-decoration:underline;cursor:pointer;font-size:12px;padding:4px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <div class="logo" aria-label="The Huddl">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="16" rx="14" ry="9" transform="rotate(-35 16 16)" fill="#FF6A13"/><path d="M11 21l10-10M13 15l4 4M15 13l4 4M11 17l4 4" stroke="#0B1F3A" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>The <b>Huddl</b></span>
+    </div>
+    <div class="switch" role="group" aria-label="Switch view">
+      <button data-mode="player">Player</button>
+      <button data-mode="coach">Coach</button>
+    </div>
+  </header>
+  <main id="main"></main>
+  <nav class="tabs" id="tabs" hidden>
+    <button data-go="checkin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>Check-in</button>
+    <button data-go="progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V12M12 20V5M19 20v-9"/></svg>Progress</button>
+  </nav>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+// ---------- Sample data (all made up) ----------
+const ITEMS = [
+  {id:"film",  icon:"🎬", name:"Film study",           hint:"15+ min on today's install"},
+  {id:"sleep", icon:"😴", name:"8 hours of sleep",     hint:"Lights out on time last night"},
+  {id:"recov", icon:"🧘", name:"Recovery & stretching", hint:"Mobility, foam roll, cold tub"},
+  {id:"hydro", icon:"💧", name:"Hydration",            hint:"Bottle filled & on pace"},
+  {id:"focus", icon:"🎯", name:"Pre-practice focus",    hint:"Breathing + 3 goals for today"},
+];
+// Daily counts for the 6 days before today (oldest first). Today comes from the check-in for "you",
+// and from the last value for everyone else.
+const ME = {id:"me", name:"Jordan Reyes", pos:"WR", num:11, year:"Jr.", past:[4,3,5,5,5,5]};
+const ROSTER = [
+  {id:"p1",  name:"Marcus Holloway", pos:"QB", num:7,  year:"Sr.", days:[5,5,5,4,5,5,5]},
+  {id:"p2",  name:"Devin Okafor",    pos:"RB", num:22, year:"So.", days:[5,4,5,5,4,5,4]},
+  {id:"p3",  name:"Tyler Brandt",    pos:"OL", num:64, year:"Jr.", days:[4,5,4,5,5,4,5]},
+  {id:"p4",  name:"Isaiah Mercer",   pos:"CB", num:3,  year:"Fr.", days:[3,2,3,1,2,0,1]},
+  {id:"p5",  name:"Caleb Whitaker",  pos:"LB", num:44, year:"Sr.", days:[5,5,4,5,5,5,4]},
+  {id:"p6",  name:"Andre Fontaine",  pos:"DL", num:91, year:"Jr.", days:[4,3,4,3,4,2,3]},
+  {id:"p7",  name:"Noah Castellano", pos:"TE", num:88, year:"So.", days:[4,4,3,5,3,4,3]},
+  {id:"p8",  name:"Jalen Pryor",     pos:"S",  num:21, year:"Jr.", days:[2,3,1,2,2,1,0]},
+  {id:"p9",  name:"Owen Kessler",    pos:"K",  num:39, year:"Sr.", days:[5,5,5,5,5,4,5]},
+  {id:"p10", name:"Malik Durand",    pos:"WR", num:1,  year:"Fr.", days:[5,4,3,3,4,2,3]},
+  {id:"p11", name:"Ethan Vasquez",   pos:"OL", num:72, year:"So.", days:[3,4,2,3,2,2,1]},
+];
+
+// ---------- Helpers ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function lastSevenDays(){
+  const out = [], d = new Date();
+  for (let i=6;i>=0;i--){ const x = new Date(d); x.setDate(d.getDate()-i); out.push(i===0?"Today":DOW[x.getDay()]); }
+  return out;
+}
+const todayKey = new Date().toISOString().slice(0,10);
+const STORE = "huddl-v1";
+function load(){ try { const s = JSON.parse(localStorage.getItem(STORE)||"{}"); return s.date===todayKey ? s : {date:todayKey, done:[]}; } catch { return {date:todayKey, done:[]}; } }
+function save(){ try { localStorage.setItem(STORE, JSON.stringify(state)); } catch {} }
+let state = load();
+
+// Deterministic "which items were missed" for sample days, so per-item breakdowns stay stable.
+function seeded(seed){ let t = seed>>>0; return () => { t += 0x6D2B79F5; let r = Math.imul(t ^ t>>>15, 1|t); r ^= r + Math.imul(r ^ r>>>7, 61|r); return ((r ^ r>>>14)>>>0)/4294967296; }; }
+function itemsFor(pid, dayIdx, count){
+  const rnd = seeded([...pid].reduce((a,c)=>a*31+c.charCodeAt(0),7) + dayIdx*101);
+  // Sleep and film get skipped most often — makes the coach breakdown tell a story.
+  const weights = {film:1.4, sleep:1.7, recov:1.2, hydro:.6, focus:.8};
+  const order = ITEMS.map(i => ({id:i.id, k: rnd()*weights[i.id]})).sort((a,b)=>a.k-b.k);
+  return order.slice(0,count).map(o=>o.id);
+}
+function meDays(){ return [...ME.past, state.done.length]; }
+function playerDays(p){ return p.id==="me" ? meDays() : p.days; }
+function playerItems(p){
+  return playerDays(p).map((c,i) => (p.id==="me" && i===6) ? state.done : itemsFor(p.id, i, c));
+}
+const pct = days => Math.round(days.reduce((a,b)=>a+b,0) / (days.length*5) * 100);
+function status(p){
+  const v = pct(playerDays(p));
+  if (v >= 80) return {key:"good", label:"On track",        icon:"✓", rank:2};
+  if (v >= 60) return {key:"warn", label:"Slipping",        icon:"▼", rank:1};
+  return             {key:"bad",  label:"Needs check-in",  icon:"!", rank:0};
+}
+function streak(days){ // consecutive full (5/5) days ending today; an unfinished today doesn't break it
+  let n = 0, i = days.length-1;
+  if (days[i] < 5) i--;
+  for (; i>=0 && days[i]===5; i--) n++;
+  return n;
+}
+function encouragement(days){
+  const v = pct(days), today = days[6], prev = days.slice(0,6), best = Math.max(...prev);
+  if (v >= 90) return "Elite week. You're setting the standard for the room — keep stacking days.";
+  if (today === 5 && v >= 75) return "Full day locked in. That's how starters are built — do it again tomorrow.";
+  if (v >= 75) return "Strong week. Finish today 5-for-5 and you're right at the top of the group.";
+  if (v >= 55) return `Solid base. You've already hit ${best}/5 this week — match it today.`;
+  return "Every rep counts. Start with one item right now and build from there.";
+}
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toast.h); toast.h = setTimeout(()=>t.classList.remove("on"), 1800); }
+
+// ---------- Chart (single series: items completed per day, 0–5) ----------
+function chart(days, opts={}){
+  const labels = lastSevenDays();
+  const cols = days.map((v,i) => {
+    const isToday = i===6;
+    const h = v/5*100;
+    return `<button class="col${opts.dimToday && isToday && v<5 ? " dim":""}" data-i="${i}" aria-label="${labels[i]}: ${v} of 5">
+      ${isToday ? `<span class="lab">${v}</span>` : ""}
+      ${v ? `<span class="b" style="height:${h}%"></span>` : `<span class="zero"></span>`}
+    </button>`;
+  }).join("");
+  const grid = [5].map(g => `<div class="grid" style="bottom:${g/5*100}%"><span>${g}</span></div>`).join("");
+  const table = `<table class="sr"><caption>Routine items completed per day</caption><tr>${labels.map(l=>`<th>${l}</th>`).join("")}</tr><tr>${days.map(v=>`<td>${v} of 5</td>`).join("")}</tr></table>`;
+  return `<div class="chart" data-days="${days.join(",")}">
+    <div class="plot">${grid}${cols}</div>
+    <div class="days">${labels.map((l,i)=>`<span class="${i===6?"today":""}">${l}</span>`).join("")}</div>
+    ${table}
+  </div>`;
+}
+document.addEventListener("click", e => {
+  const col = e.target.closest(".col");
+  document.querySelectorAll(".tip").forEach(t=>t.remove());
+  if (!col) return;
+  const c = col.closest(".chart"), days = c.dataset.days.split(",").map(Number), i = +col.dataset.i;
+  const tip = document.createElement("div");
+  tip.className = "tip"; tip.textContent = `${lastSevenDays()[i]} · ${days[i]} of 5 done`;
+  const cr = c.getBoundingClientRect(), r = col.getBoundingClientRect();
+  const x = Math.min(Math.max(r.left - cr.left + r.width/2, 60), cr.width-60);
+  tip.style.left = x+"px"; tip.style.top = (150 - days[i]/5*150 - 8)+"px";
+  c.appendChild(tip);
+});
+
+// ---------- Screens ----------
+function ringSVG(n){
+  const C = 2*Math.PI*32, f = n/5;
+  return `<div class="ring"><svg viewBox="0 0 76 76"><circle cx="38" cy="38" r="32" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="8"/>
+    <circle cx="38" cy="38" r="32" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="round" stroke-dasharray="${C*f} ${C}" style="transition:stroke-dasharray .3s"/></svg>
+    <div class="num">${n}<small>/5</small></div></div>`;
+}
+const check = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
+
+function viewCheckin(){
+  const n = state.done.length;
+  const date = new Date().toLocaleDateString(undefined,{weekday:"long", month:"short", day:"numeric"});
+  return `
+    <div><p class="eyebrow">${esc(date)}</p><h1>Daily check-in</h1></div>
+    <div class="hero">${ringSVG(n)}
+      <div><p class="eyebrow">#${ME.num} ${esc(ME.name)} · ${ME.pos}</p>
+      <p style="font-weight:600;font-size:18px;line-height:24px">${n===5 ? "All five done. Locked in." : n===0 ? "Tap each item you've knocked out today." : `${5-n} to go. Keep moving.`}</p></div>
+    </div>
+    <div class="items">${ITEMS.map(it => `
+      <button class="item" data-item="${it.id}" aria-pressed="${state.done.includes(it.id)}">
+        <span class="ic" aria-hidden="true">${it.icon}</span>
+        <span class="t"><strong>${esc(it.name)}</strong><span>${esc(it.hint)}</span></span>
+        <span class="ck" aria-hidden="true">${check}</span>
+      </button>`).join("")}
+    </div>
+    ${n===5 ? `<div class="done-banner"><span class="big" aria-hidden="true">🔥</span><div><strong>Streak: ${streak(meDays())} days</strong><p class="muted" style="font-size:14px;line-height:20px">Coaches can see you're locked in.</p></div></div>` : ""}
+    <button class="btn primary block" data-go="progress">${n===5 ? "See my week" : "Save & see my week"}</button>
+    <p class="foot">Demo · sample data only <button class="linkish" id="reset">Reset today</button></p>`;
+}
+
+function viewProgress(){
+  const days = meDays(), s = streak(days), total = days.reduce((a,b)=>a+b,0);
+  return `
+    <div><p class="eyebrow">#${ME.num} ${esc(ME.name)} · ${ME.pos}</p><h1>My progress</h1></div>
+    <div class="card streak">
+      <span class="fire" aria-hidden="true">🔥</span>
+      <div><div class="v">${s}</div><p class="muted">day streak of full 5/5 check-ins</p></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="v">${pct(days)}%</div><div class="l">This week</div></div>
+      <div class="stat"><div class="v">${total}</div><div class="l">Items done</div></div>
+      <div class="stat"><div class="v">${days.filter(d=>d===5).length}</div><div class="l">Perfect days</div></div>
+    </div>
+    <div class="card">
+      <h2>Last 7 days</h2>
+      <p class="muted" style="font-size:14px">Routine items completed each day, out of 5. Tap a bar for details.</p>
+      ${chart(days, {dimToday:true})}
+    </div>
+    <p class="quote">${esc(encouragement(days))}</p>
+    ${days[6]<5 ? `<button class="btn primary block" data-go="checkin">Finish today's check-in</button>` : ""}`;
+}
+
+let sortBy = "status";
+function allPlayers(){ return [ME, ...ROSTER]; }
+function viewCoach(){
+  const ps = allPlayers().map(p => ({p, v:pct(playerDays(p)), s:status(p)}));
+  const sorters = {
+    status: (a,b) => a.s.rank-b.s.rank || a.v-b.v,
+    pct:    (a,b) => b.v-a.v,
+    name:   (a,b) => a.p.name.split(" ").pop().localeCompare(b.p.name.split(" ").pop()),
+  };
+  ps.sort(sorters[sortBy]);
+  const count = k => ps.filter(x=>x.s.key===k).length;
+  return `
+    <div><p class="eyebrow">Coach dashboard · This week</p><h1>Team routine</h1></div>
+    <div class="stats">
+      <div class="stat good"><div class="v">${count("good")}</div><div class="l">✓ On track</div></div>
+      <div class="stat warn"><div class="v">${count("warn")}</div><div class="l">▼ Slipping</div></div>
+      <div class="stat bad"><div class="v">${count("bad")}</div><div class="l">! Needs check-in</div></div>
+    </div>
+    <div>
+      <p class="eyebrow" style="margin-bottom:8px">Sort by</p>
+      <div class="seg" role="group" aria-label="Sort players">
+        ${[["status","Status"],["pct","Completion"],["name","Name"]].map(([k,l])=>`<button data-sort="${k}" aria-pressed="${sortBy===k}">${l}</button>`).join("")}
+      </div>
+    </div>
+    <div class="roster">${ps.map(({p,v,s}) => `
+      <button class="row" data-player="${p.id}">
+        <span class="jersey">${p.num}</span>
+        <span class="who"><strong>${esc(p.name)}${p.id==="me"?'<span class="you">YOU</span>':""}</strong><span>${p.pos} · ${p.year}</span></span>
+        <span class="pct"><b>${v}%</b><span class="badge ${s.key}"><span aria-hidden="true">${s.icon}</span>${s.label}</span></span>
+      </button>`).join("")}
+    </div>
+    <p class="foot">On track ≥ 80% · Slipping 60–79% · Needs check-in &lt; 60%</p>`;
+}
+
+function viewPlayer(id){
+  const p = allPlayers().find(x=>x.id===id);
+  if (!p) return viewCoach();
+  const days = playerDays(p), items = playerItems(p), s = status(p);
+  const per = ITEMS.map(it => ({it, n: items.filter(d=>d.includes(it.id)).length})).sort((a,b)=>a.n-b.n);
+  const weakest = per[0];
+  return `
+    <button class="back" data-go="coach"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg>All players</button>
+    <div class="ph"><span class="jersey">${p.num}</span>
+      <div><h1 style="font-size:30px;line-height:32px">${esc(p.name)}</h1><p class="muted">${p.pos} · ${p.year}</p></div></div>
+    <div class="stats">
+      <div class="stat"><div class="v">${pct(days)}%</div><div class="l">This week</div></div>
+      <div class="stat"><div class="v">${streak(days)}</div><div class="l">Day streak</div></div>
+      <div class="stat" style="display:flex;align-items:center;justify-content:center"><span class="badge ${s.key}"><span aria-hidden="true">${s.icon}</span>${s.label}</span></div>
+    </div>
+    <div class="card"><h2>Last 7 days</h2><p class="muted" style="font-size:14px">Items completed each day, out of 5.</p>${chart(days)}</div>
+    <div class="card meter"><h2>By routine item</h2>
+      ${ITEMS.map(it => { const n = per.find(x=>x.it.id===it.id).n; return `<div class="r"><span>${it.icon} ${esc(it.name)}</span><b>${n}/7</b><div class="track"><div class="fill" style="width:${n/7*100}%"></div></div></div>`; }).join("")}
+    </div>
+    ${weakest.n < 6 ? `<p class="quote">Most-missed: <strong>${esc(weakest.it.name.toLowerCase())}</strong> (${weakest.n}/7 days). Good place to start the conversation.</p>` : `<p class="quote">Consistent across the board this week.</p>`}
+    <button class="btn primary block" id="nudge">Send a check-in nudge</button>`;
+}
+
+// ---------- Router ----------
+function route(){
+  const [mode, sub] = (location.hash.replace(/^#\/?/,"") || "checkin").split("/");
+  const isCoach = mode==="coach";
+  document.querySelectorAll(".switch button").forEach(b => b.setAttribute("aria-pressed", String((b.dataset.mode==="coach")===isCoach)));
+  $("#tabs").hidden = isCoach;
+  document.querySelectorAll("#tabs button").forEach(b => b.dataset.go===mode ? b.setAttribute("aria-current","page") : b.removeAttribute("aria-current"));
+  $("#main").innerHTML = isCoach ? (sub ? viewPlayer(sub) : viewCoach()) : mode==="progress" ? viewProgress() : viewCheckin();
+}
+function go(h, replace){ const url = "#/"+h; if (replace) history.replaceState(null,"",url); else location.hash = url; route(); window.scrollTo(0,0); }
+window.addEventListener("hashchange", route);
+
+document.addEventListener("click", e => {
+  const t = e.target;
+  const sw = t.closest(".switch button"); if (sw) return go(sw.dataset.mode==="coach" ? "coach" : "checkin");
+  const g = t.closest("[data-go]"); if (g) return go(g.dataset.go);
+  const it = t.closest("[data-item]");
+  if (it){
+    const id = it.dataset.item, on = state.done.includes(id);
+    state.done = on ? state.done.filter(x=>x!==id) : [...state.done, id];
+    save(); if (!on && navigator.vibrate) navigator.vibrate(12);
+    const y = window.scrollY; route(); window.scrollTo(0,y);
+    if (state.done.length===5 && !on) toast("🔥 5 for 5 — check-in complete");
+    return;
+  }
+  const so = t.closest("[data-sort]"); if (so){ sortBy = so.dataset.sort; route(); return; }
+  const row = t.closest("[data-player]"); if (row) return go("coach/"+row.dataset.player);
+  if (t.closest("#nudge")) return toast("Nudge sent (demo only)");
+  if (t.closest("#reset")){ state = {date:todayKey, done:[]}; save(); route(); toast("Today's check-in cleared"); }
+});
+route();
+</script>
+</body>
+</html>
